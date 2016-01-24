@@ -1,0 +1,5 @@
+<Navbar>
+	<NavbarItem src="index.md" />
+	<NavbarItem src="download/index.md" />
+	<NavbarItem src="samples/index.md" />
+</Navbar>
