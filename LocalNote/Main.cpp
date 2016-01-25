@@ -21,6 +21,8 @@ public:
 		PathName	outputFullPath;
 		PathName	relpathToRoot;
 
+		String		htmlText;
+
 		void AnalyzeMarkdown()
 		{
 			StreamReader reader(srcFullPath);
@@ -37,12 +39,39 @@ public:
 			}
 		}
 
-		String MakeContents() const
+		void Expand()
 		{
+			std::string target("baaaby");
+			std::smatch sm;
+
+			std::regex re1("a(a)*b");
+			std::regex_search(target, sm, re1);
+			std::cout << "entire match: " << sm[0] << '\n'
+				<< "submatch #1: " << sm[1] << '\n';
+
+			std::regex re2("a(a*)b");
+			std::regex_search(target, sm, re2);
+			std::cout << "entire match: " << sm[0] << '\n'
+				<< "submatch #1: " << sm[1] << '\n';
+
+
+
 			String text;
 			String args = String::Format(_T("-f markdown -t html5 -o tmp \"{0}\""), srcFullPath);
 			Process::Execute(_T("pandoc"), args);
-			return FileSystem::ReadAllText(_T("tmp"), Encoding::GetUTF8Encoding());
+
+			StreamReader reader(_T("tmp"), Encoding::GetUTF8Encoding());
+			StringWriter writer;
+			String line;
+			std::wregex re(L"(<h2 id=\".*\">.*</h)");
+			while (reader.ReadLine(&line))
+			{
+				std::wsmatch m; // match_results
+				std::wstring ss = line.c_str();
+				std::regex_search(ss, m, re);
+				writer.WriteLine(line);
+			}
+			htmlText = writer.ToString();
 		}
 	};
 
@@ -88,6 +117,7 @@ private:
 						item.info.outputFullPath = PathName(m_pathOutput, item.info.outputRelPath);
 						item.info.relpathToRoot = item.info.outputFullPath.GetParent().MakeRelative(m_pathOutput);
 						item.info.AnalyzeMarkdown();
+						item.info.Expand();
 						m_navbarItemList.Add(item);
 					}
 
@@ -112,7 +142,7 @@ private:
 	{
 		String pageText = FileSystem::ReadAllText(PathName(m_pathTemplate, _T("page.html")).c_str(), Encoding::GetUTF8Encoding());
 		pageText = pageText.Replace(_T("NAVBAR_ITEMS"), MakeNavbatText(active, page).c_str());
-		pageText = pageText.Replace(_T("PAGE_CONTENTS"), page.MakeContents().c_str());
+		pageText = pageText.Replace(_T("PAGE_CONTENTS"), page.htmlText.c_str());
 
 		FileSystem::CreateDirectory(page.outputFullPath.GetParent());
 		FileSystem::WriteAllText(page.outputFullPath.c_str(), pageText, Encoding::GetUTF8Encoding());
