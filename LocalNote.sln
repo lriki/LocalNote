@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LocalNote", "LocalNote\Loca
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuminoCore_Static", "external\Lumino.Core\build_vs2015\LuminoCore_Static.vcxproj", "{47D7A774-F32F-42E4-87C3-9313679A4EB0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuminoCore_UnitTest", "external\Lumino.Core\build_vs2015\test\LuminoCore_UnitTest.vcxproj", "{412BD126-00FC-489A-9814-5A27C6E5E00A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +52,18 @@ Global
 		{47D7A774-F32F-42E4-87C3-9313679A4EB0}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
 		{47D7A774-F32F-42E4-87C3-9313679A4EB0}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|Win32
 		{47D7A774-F32F-42E4-87C3-9313679A4EB0}.RelWithDebInfo|x86.Build.0 = RelWithDebInfo|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Debug|x64.ActiveCfg = Debug|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Debug|x86.ActiveCfg = Debug|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Debug|x86.Build.0 = Debug|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.MinSizeRel|x64.ActiveCfg = MinSizeRel|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.MinSizeRel|x86.ActiveCfg = MinSizeRel|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.MinSizeRel|x86.Build.0 = MinSizeRel|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Release|x64.ActiveCfg = Release|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Release|x86.ActiveCfg = Release|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.Release|x86.Build.0 = Release|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|Win32
+		{412BD126-00FC-489A-9814-5A27C6E5E00A}.RelWithDebInfo|x86.Build.0 = RelWithDebInfo|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

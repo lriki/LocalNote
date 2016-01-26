@@ -9,6 +9,26 @@
 
 	<!-- Bootstrap -->
 	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	
+	<!-- affix-nav style -->
+	<style>
+		.affix-nav{
+			margin-top:50px;
+		}
+		.affix-nav .nav li{
+			border-left: 2px solid #FFFFFF;
+		}
+		.affix-nav .nav li.active{
+			font-weight: bold;
+			border-left: 2px solid #0288D1;
+		}
+		.nav .cap {
+			font-weight: bold;
+			position: relative;
+			display: block;
+			padding: 10px 15px;
+		}
+	</style>
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -34,38 +54,52 @@ NAVBAR_ITEMS
 		</header>
 
 
-				<div class="container">
-		<div class="row">
-			<div class="col-md-2">
-				<div class="list-group">
-					<a href="#" class="list-group-item active">Cras justo odio</a>
-					<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-					<a href="#" class="list-group-item">Morbi leo risus</a>
-					<a href="#" class="list-group-item">Porta ac consectetur ac</a>
-					<a href="#" class="list-group-item">Vestibulum at eros</a>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-2">
+					<div class="list-group">
+						<a href="#" class="list-group-item active">Cras justo odio</a>
+						<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+						<a href="#" class="list-group-item">Morbi leo risus</a>
+						<a href="#" class="list-group-item">Porta ac consectetur ac</a>
+						<a href="#" class="list-group-item">Vestibulum at eros</a>
+					</div>
 				</div>
-			</div>
-			<div class="col-md-8">
+				<div class="col-md-8">
 PAGE_CONTENTS
-			</div>
-			<div class="col-md-2">
-			
-				<div class="list-group">
-					<a href="#" class="list-group-item active">Cras justo odio</a>
-					<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-					<a href="#" class="list-group-item">Morbi leo risus</a>
-					<a href="#" class="list-group-item">Porta ac consectetur ac</a>
-					<a href="#" class="list-group-item">Vestibulum at eros</a>
 				</div>
-				
+				<div class="col-md-2">
+PAGE_INDEX_LIST
+				</div>
 			</div>
 		</div>
-				</div>
 		
 
-		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-		<!-- Include all compiled plugins (below), or include individual files as needed -->
 		<script src="bootstrap/js/bootstrap.min.js"></script>
+		<script>
+            $(function(){
+
+                $('nav.affix-nav').affix({
+                    offset:{
+                        top: 70,
+                        bottom:300
+                    }
+                }).on('affix.bs.affix', function () {
+                    $(this).css({
+                            'top': '0'
+                    });
+                    console.log('affix.bs.affix');
+                }).on('affixed.bs.affix', function(){
+                    console.log('affixed.bs.affix');
+                }).on('affix-bottom.bs.affix', function(){
+                    console.log('affix-bottom.bs.affix');
+                }).on('affixed-bottom.bs.affix', function(){
+                    console.log('affixed-bottom.bs.affix');
+                });
+                
+                $('body').scrollspy({ target: 'nav.affix-nav' })
+            });
+        </script>
 	</body>
 </html>

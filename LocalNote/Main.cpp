@@ -11,6 +11,12 @@ class Manager
 {
 public:
 
+	struct LinkElement
+	{
+		String	href;
+		String	text;
+	};
+
 	struct PageInfo
 	{
 		PathName	srcPath;
@@ -22,6 +28,7 @@ public:
 		PathName	relpathToRoot;
 
 		String		htmlText;
+		Array<LinkElement>	m_linkElementList;
 
 		void AnalyzeMarkdown()
 		{
@@ -41,21 +48,6 @@ public:
 
 		void Expand()
 		{
-			std::string target("baaaby");
-			std::smatch sm;
-
-			std::regex re1("a(a)*b");
-			std::regex_search(target, sm, re1);
-			std::cout << "entire match: " << sm[0] << '\n'
-				<< "submatch #1: " << sm[1] << '\n';
-
-			std::regex re2("a(a*)b");
-			std::regex_search(target, sm, re2);
-			std::cout << "entire match: " << sm[0] << '\n'
-				<< "submatch #1: " << sm[1] << '\n';
-
-
-
 			String text;
 			String args = String::Format(_T("-f markdown -t html5 -o tmp \"{0}\""), srcFullPath);
 			Process::Execute(_T("pandoc"), args);
@@ -63,15 +55,41 @@ public:
 			StreamReader reader(_T("tmp"), Encoding::GetUTF8Encoding());
 			StringWriter writer;
 			String line;
-			std::wregex re(L"(<h2 id=\".*\">.*</h)");
 			while (reader.ReadLine(&line))
 			{
-				std::wsmatch m; // match_results
-				std::wstring ss = line.c_str();
-				std::regex_search(ss, m, re);
+				MatchResult m;
+				if (Regex::Match(line, _T("<h2 id=\"(.*)\">(.*)</h2>"), &m))
+				{
+					m_linkElementList.Add(LinkElement{m[1], m[2]});
+				}
+				
 				writer.WriteLine(line);
 			}
 			htmlText = writer.ToString();
+		}
+
+		String MakePageIndexList() const
+		{
+			// http://am-yu.net/2014/04/20/bootstrap3-affix-scrollspy/
+			StringWriter writer;
+			writer.WriteLine(_T(R"(<nav class="affix-nav"><ul class="nav">)"));
+			writer.WriteLine(_T(R"(<li class="cap">page contents</li>)"));
+			for (auto& e : m_linkElementList)
+			{
+				writer.WriteLine(String::Format(_T(R"(<li><a href="#{0}">{1}</a></li>)"), e.href, e.text));
+			}
+			writer.WriteLine(_T(R"(</ul></nav>)"));
+			return writer.ToString();
+#if 0
+			StringWriter writer;
+			writer.WriteLine(_T(R"(<nav class="affix-nav"><div class="list-group nav">)"));
+			for (auto& e : m_linkElementList)
+			{
+				writer.WriteLine(String::Format(_T(R"(<a href="#{0}" class="list-group-item">{1}</a>)"), e.href, e.text));
+			}
+			writer.WriteLine(_T(R"(</div></nav>)"));
+			return writer.ToString();
+#endif
 		}
 	};
 
@@ -138,11 +156,13 @@ private:
 		return writer.ToString();
 	}
 
+	// page Ç…Ç¬Ç¢ÇƒÇÃ html ÉtÉ@ÉCÉãÇçÏÇÈ
 	void MakePageFile(const NavbarItem* active, const PageInfo& page)
 	{
 		String pageText = FileSystem::ReadAllText(PathName(m_pathTemplate, _T("page.html")).c_str(), Encoding::GetUTF8Encoding());
 		pageText = pageText.Replace(_T("NAVBAR_ITEMS"), MakeNavbatText(active, page).c_str());
 		pageText = pageText.Replace(_T("PAGE_CONTENTS"), page.htmlText.c_str());
+		pageText = pageText.Replace(_T("PAGE_INDEX_LIST"), page.MakePageIndexList().c_str());
 
 		FileSystem::CreateDirectory(page.outputFullPath.GetParent());
 		FileSystem::WriteAllText(page.outputFullPath.c_str(), pageText, Encoding::GetUTF8Encoding());
