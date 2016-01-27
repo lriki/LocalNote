@@ -5,7 +5,26 @@ pandoc -f markdown -t html5 -o index.html index.md
 
 */
 #include "stdafx.h"
-using namespace ln;
+#include "Manager.h"
+
+int main(int argc, char **argv)
+{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	try
+	{
+		Manager manager;
+		manager.Execute(_T("../docs/src"), _T("../docs/templates"), _T("../docs/release"));
+	}
+	catch (Exception& e)
+	{
+		_tprintf(e.GetMessage());
+		return 1;
+	}
+	return 0;
+}
+
+#if 0
 
 class Manager
 {
@@ -121,7 +140,7 @@ private:
 		while (reader.Read())
 		{
 			if (reader.GetNodeType() == XmlNodeType::Element &&
-				reader.GetName() == _T("NavbarItem") &&
+				reader.GetName() == _T("CategoryItem") &&
 				reader.MoveToFirstAttribute())
 			{
 				do
@@ -188,4 +207,5 @@ int main()
 	}
     return 0;
 }
+#endif
 

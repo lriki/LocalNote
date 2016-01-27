@@ -1,5 +1,8 @@
-<Navbar>
-	<NavbarItem src="index.md" />
-	<NavbarItem src="download/index.md" />
-	<NavbarItem src="samples/index.md" />
-</Navbar>
+<Categories>
+	<CategoryItem page="index.md" />
+	<CategoryItem page="download/index.md" />
+	<CategoryItem caption="サンプル">
+		<CategoryItem  page="index.md" tok="samples/Lumino/category_index.xml" />
+		<CategoryItem  page="index.md" tok="samples/Lumino/category_index.xml" />
+	</CategoryItem>
+</Categories>

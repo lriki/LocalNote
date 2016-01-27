@@ -1,0 +1,9 @@
+<Toc>
+	<TreeItem caption="グラフィックス">
+		<TreeItem page="graphics/painting.md" />
+		<TreeItem page="graphics/painting.md" />
+	</TreeItem>
+	<TreeItem caption="ユーザー入力">
+		<TreeItem page="input/input.md" />
+	</TreeItem>
+</Toc>

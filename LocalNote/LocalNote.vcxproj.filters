@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Manager.cpp" />
   </ItemGroup>
 </Project>
