@@ -13,7 +13,7 @@
 	<!-- affix-nav style -->
 	<style>
 		.affix-nav{
-			margin-top:50px;
+			margin-top:20px;
 		}
 		.affix-nav .nav li{
 			border-left: 2px solid #FFFFFF;
@@ -27,6 +27,9 @@
 			position: relative;
 			display: block;
 			padding: 10px 15px;
+		}
+		.tree-toggler{
+			margin: 3px;
 		}
 	</style>
 
@@ -53,17 +56,10 @@ NAVBAR_ITEMS
 			</div>
 		</header>
 
-
 		<div class="container">
 			<div class="row">
 				<div class="col-md-2">
-					<div class="list-group">
-						<a href="#" class="list-group-item active">Cras justo odio</a>
-						<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
-						<a href="#" class="list-group-item">Morbi leo risus</a>
-						<a href="#" class="list-group-item">Porta ac consectetur ac</a>
-						<a href="#" class="list-group-item">Vestibulum at eros</a>
-					</div>
+TOC_TREE
 				</div>
 				<div class="col-md-8">
 PAGE_CONTENTS
@@ -79,7 +75,6 @@ PAGE_INDEX_LIST
 		<script src="bootstrap/js/bootstrap.min.js"></script>
 		<script>
             $(function(){
-
                 $('nav.affix-nav').affix({
                     offset:{
                         top: 70,
@@ -101,5 +96,14 @@ PAGE_INDEX_LIST
                 $('body').scrollspy({ target: 'nav.affix-nav' })
             });
         </script>
+		<script type="text/javascript">
+			$(document).ready(function () {
+				$('span.tree-toggler').click(function () {
+					$(this).parent().children('ul.tree-item').toggle(200);
+					$(this).toggleClass("glyphicon-triangle-bottom");
+					$(this).toggleClass("glyphicon-triangle-right");
+				});
+			});
+		</script>
 	</body>
 </html>

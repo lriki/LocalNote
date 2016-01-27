@@ -13,6 +13,9 @@ public:
 	const PathName& GetRelPathToRoot() const { return m_relpathToRoot; }
 	const String& GetCaption() const { return m_caption; }
 
+	// このページから指定したページへ飛ぶための相対パスを作成する
+	PathName MakeRelativePath(Page* page) const;
+
 	void BuildContents();
 
 	void ExportPageFile();
@@ -49,6 +52,8 @@ public:
 	Page*						m_page;
 
 	static RefPtr<TocTreeItem> Deserialize(XmlFileReader* reader, CategoryToc* ownerToc);
+
+	String GetCaption() const;
 };
 
 class CategoryToc : public RefObject
@@ -63,6 +68,9 @@ public:
 	Array<RefPtr<TocTreeItem>>	m_allTreeItemList;
 
 	static RefPtr<CategoryToc> Deserialize(XmlFileReader* reader, CategoryItem* owner);
+
+	// page : ナビバーを埋め込みたいページ
+	String MakeTocTree(Page* page);
 };
 
 class CategoryItem : public RefObject

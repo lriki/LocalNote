@@ -22,6 +22,14 @@ Page::Page(Manager* manager, CategoryItem* ownerCategory, const PathName& srcFil
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
+PathName Page::MakeRelativePath(Page* page) const
+{
+	return String::Format(_T("{0}/{1}"), GetRelPathToRoot(), page->GetOutputRelPath());	// root に戻って、指定のページに移動するようなパス
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 void Page::BuildContents()
 {
 	String text;
@@ -83,6 +91,12 @@ void Page::ExportPageFile()
 {
 	String pageText = FileSystem::ReadAllText(PathName(m_manager->m_templateDir, _T("page.html")).c_str(), Encoding::GetUTF8Encoding());
 	pageText = pageText.Replace(_T("NAVBAR_ITEMS"), m_ownerCategory->MakeNavbarTextInActive(this));
+	if (m_ownerCategory->m_toc != nullptr) {
+		pageText = pageText.Replace(_T("TOC_TREE"), m_ownerCategory->m_toc->MakeTocTree(this));
+	}
+	else {
+		pageText = pageText.Replace(_T("TOC_TREE"), _T(""));
+	}
 	pageText = pageText.Replace(_T("PAGE_CONTENTS"), m_pageContentsText);
 	pageText = pageText.Replace(_T("PAGE_INDEX_LIST"), m_pageNavListText);
 
@@ -138,6 +152,20 @@ RefPtr<TocTreeItem> TocTreeItem::Deserialize(XmlFileReader* reader, CategoryToc*
 	return item;
 }
 
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+String TocTreeItem::GetCaption() const
+{
+	if (m_page == nullptr) {
+		return m_caption;
+	}
+	if (!m_caption.IsEmpty()) {
+		return m_caption;
+	}
+	return m_page->GetCaption();
+}
+
 //=============================================================================
 // CategoryToc
 //=============================================================================
@@ -167,6 +195,34 @@ RefPtr<CategoryToc> CategoryToc::Deserialize(XmlFileReader* reader, CategoryItem
 	}
 
 	return item;
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
+String CategoryToc::MakeTocTree(Page* page)
+{
+	StringWriter writer;
+	writer.WriteLine(_T("<ul class=\"list-group\">"));
+
+	for (auto& item : m_rootTreeItemList)
+	{
+		writer.WriteLine(_T("<li class=\"list-group-item\">"));
+		writer.WriteLine(_T("<span class=\"tree-toggler glyphicon glyphicon-triangle-bottom\"></span>"));
+		writer.WriteLine(String::Format(_T("<label class=\"nav-header\">{0}</label>"), item->GetCaption()));
+
+		writer.WriteLine(_T("<ul class=\"nav nav-list tree-item\">"));
+		for (auto& child : item->m_children)
+		{
+			writer.WriteLine(String::Format(_T("<li><a href=\"{0}\">{1}</a></li>"), page->MakeRelativePath(child->m_page), child->GetCaption()));
+		}
+		writer.WriteLine(_T("</ul>"));
+
+		writer.WriteLine(_T("</li>"));
+	}
+
+	writer.WriteLine(_T("</ul>"));
+	return writer.ToString();
 }
 
 //=============================================================================
@@ -325,6 +381,10 @@ void Manager::Execute(const PathName& srcDir, const PathName& templateDir, const
 	for (auto& page : m_allPageList)
 	{
 		page->BuildContents();
+	}
+	// 出力する
+	for (auto& page : m_allPageList)
+	{
 		page->ExportPageFile();
 	}
 
