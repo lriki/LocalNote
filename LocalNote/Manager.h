@@ -63,7 +63,7 @@ public:
 	CategoryItem*				m_ownerCategoryItem;
 
 	// Deserialize で設定
-	PathName					m_srcPagePath;		// .md のパス
+	PathName					m_srcPagePath;
 	Array<TocTreeItem*>			m_rootTreeItemList;
 	Array<RefPtr<TocTreeItem>>	m_allTreeItemList;
 
@@ -81,7 +81,8 @@ public:
 	// Deserialize で設定
 	PathName					m_srcPagePath;		// .md のパス
 	String						m_caption;
-	PathName					m_srcTokPath;		// .xml のパス
+	PathName					m_srcTokRelPath;
+	PathName					m_srcTokFullPath;		// .xml のパス
 	Array<RefPtr<CategoryItem>>	m_children;
 	Page*						m_page;
 

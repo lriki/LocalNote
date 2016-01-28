@@ -122,7 +122,8 @@ RefPtr<TocTreeItem> TocTreeItem::Deserialize(XmlFileReader* reader, CategoryToc*
 		{
 			if (reader->GetName() == _T("page"))
 			{
-				auto page = RefPtr<Page>::MakeRef(ownerToc->m_manager, ownerToc->m_ownerCategoryItem, reader->GetValue());
+				PathName path(ownerToc->m_ownerCategoryItem->m_srcTokRelPath.GetParent(), reader->GetValue());
+				auto page = RefPtr<Page>::MakeRef(ownerToc->m_manager, ownerToc->m_ownerCategoryItem, path);
 				ownerToc->m_manager->m_allPageList.Add(page);
 				item->m_page = page;
 			}
@@ -254,7 +255,8 @@ RefPtr<CategoryItem> CategoryItem::Deserialize(XmlFileReader* reader, Manager* m
 			}
 			else if (reader->GetName() == _T("tok"))
 			{
-				item->m_srcTokPath = PathName(manager->m_srcRootDir, reader->GetValue());
+				item->m_srcTokRelPath = PathName(reader->GetValue());
+				item->m_srcTokFullPath = PathName(manager->m_srcRootDir, reader->GetValue());
 			}
 
 		} while (reader->MoveToNextAttribute());
@@ -283,9 +285,9 @@ RefPtr<CategoryItem> CategoryItem::Deserialize(XmlFileReader* reader, Manager* m
 //-----------------------------------------------------------------------------
 void CategoryItem::MakeToc()
 {
-	if (!m_srcTokPath.IsEmpty())
+	if (!m_srcTokFullPath.IsEmpty())
 	{
-		XmlFileReader reader(PathName(m_manager->m_srcRootDir, m_srcTokPath));
+		XmlFileReader reader(PathName(m_manager->m_srcRootDir, m_srcTokFullPath));
 		while (reader.Read())
 		{
 			if (reader.GetNodeType() == XmlNodeType::Element &&
