@@ -1,0 +1,12 @@
+<Toc>
+	<TreeItem caption="基本機能">
+		<TreeItem page="Base/String.md" />
+		<TreeItem page="Base/PathName.md" />
+	</TreeItem>
+	<TreeItem caption="入出力">
+		<TreeItem page="IO/PathName.md" />
+	</TreeItem>
+	<TreeItem caption="文字コード">
+		<TreeItem page="Text/CharCodeConversion.md" />
+	</TreeItem>
+</Toc>

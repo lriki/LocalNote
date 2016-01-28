@@ -89,14 +89,15 @@ void Page::BuildContents()
 //-----------------------------------------------------------------------------
 void Page::ExportPageFile()
 {
-	String pageText = FileSystem::ReadAllText(PathName(m_manager->m_templateDir, _T("page.html")).c_str(), Encoding::GetUTF8Encoding());
-	pageText = pageText.Replace(_T("NAVBAR_ITEMS"), m_ownerCategory->MakeNavbarTextInActive(this));
+	String tocTree;
 	if (m_ownerCategory->m_toc != nullptr) {
-		pageText = pageText.Replace(_T("TOC_TREE"), m_ownerCategory->m_toc->MakeTocTree(this));
+		tocTree = m_ownerCategory->m_toc->MakeTocTree(this);
 	}
-	else {
-		pageText = pageText.Replace(_T("TOC_TREE"), _T(""));
-	}
+
+	String pageText = FileSystem::ReadAllText(PathName(m_manager->m_templateDir, _T("page.html")).c_str(), Encoding::GetUTF8Encoding());
+	pageText = pageText.Replace(_T("$(LN_TO_ROOT_PATH)"), GetRelPathToRoot());
+	pageText = pageText.Replace(_T("NAVBAR_ITEMS"), m_ownerCategory->MakeNavbarTextInActive(this));
+	pageText = pageText.Replace(_T("TOC_TREE"), tocTree);
 	pageText = pageText.Replace(_T("PAGE_CONTENTS"), m_pageContentsText);
 	pageText = pageText.Replace(_T("PAGE_INDEX_LIST"), m_pageNavListText);
 
