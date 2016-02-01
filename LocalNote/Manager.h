@@ -7,7 +7,7 @@ class CategoryToc;
 class Page : public RefObject
 {
 public:
-	Page(Manager* manager, CategoryItem* ownerCategory, const PathName& srcFileRelPath);
+	Page(Manager* manager, CategoryItem* ownerCategory, const PathName& dummy, const PathName& srcFileFullPath);
 
 	const PathName& GetOutputRelPath() const { return m_outputFileRelPath; }
 	const PathName& GetRelPathToRoot() const { return m_relpathToRoot; }
@@ -63,14 +63,20 @@ public:
 	CategoryItem*				m_ownerCategoryItem;
 
 	// Deserialize で設定
-	PathName					m_srcPagePath;
+	PathName					m_srcPageFullPath;
 	Array<TocTreeItem*>			m_rootTreeItemList;
 	Array<RefPtr<TocTreeItem>>	m_allTreeItemList;
 
-	static RefPtr<CategoryToc> Deserialize(XmlFileReader* reader, CategoryItem* owner);
+	static RefPtr<CategoryToc> Deserialize(XmlFileReader* reader, PathName xmlFileParentFullPath, CategoryItem* owner);
+
+	Page* GetRootPage() { return m_rootPage; }
 
 	// page : ナビバーを埋め込みたいページ
 	String MakeTocTree(Page* page);
+
+private:
+
+	Page*	m_rootPage = nullptr;
 };
 
 class CategoryItem : public RefObject
@@ -84,12 +90,13 @@ public:
 	PathName					m_srcTokRelPath;
 	PathName					m_srcTokFullPath;		// .xml のパス
 	Array<RefPtr<CategoryItem>>	m_children;
-	Page*						m_page;
 
+	Page*						m_page;
 	RefPtr<CategoryToc>			m_toc;
 
 	static RefPtr<CategoryItem> Deserialize(XmlFileReader* reader, Manager* manager, CategoryItem* parent);
 
+	Page* GetCategoryRootPage();
 	void MakeToc();
 
 	// page : ナビバーを埋め込みたいページ

@@ -8,12 +8,12 @@
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-Page::Page(Manager* manager, CategoryItem* ownerCategory, const PathName& srcFileRelPath)
+Page::Page(Manager* manager, CategoryItem* ownerCategory, const PathName& d, const PathName& srcFileFullPath)
 {
 	m_manager = manager;
 	m_ownerCategory = ownerCategory;
-	m_srcFileRelPath = srcFileRelPath;
-	m_srcFileFullPath = PathName(manager->m_srcRootDir, m_srcFileRelPath);
+	m_srcFileRelPath = m_manager->m_srcRootDir.MakeRelative(srcFileFullPath);
+	m_srcFileFullPath = srcFileFullPath;
 	m_outputFileRelPath = m_srcFileRelPath.ChangeExtension(_T("html"));
 	m_outputFileFullPath = PathName(manager->m_outputRootDir, m_outputFileRelPath);
 	m_relpathToRoot = m_outputFileFullPath.GetParent().MakeRelative(manager->m_outputRootDir);
@@ -103,6 +103,9 @@ void Page::ExportPageFile()
 
 	FileSystem::CreateDirectory(m_outputFileFullPath.GetParent());
 	FileSystem::WriteAllText(m_outputFileFullPath.c_str(), pageText, Encoding::GetUTF8Encoding());
+
+	wprintf(L"%s\n", m_srcFileRelPath.c_str());
+	wprintf(L"> %s\n", m_outputFileFullPath.c_str());
 }
 
 //=============================================================================
@@ -123,8 +126,8 @@ RefPtr<TocTreeItem> TocTreeItem::Deserialize(XmlFileReader* reader, CategoryToc*
 		{
 			if (reader->GetName() == _T("page"))
 			{
-				PathName path(ownerToc->m_ownerCategoryItem->m_srcTokRelPath.GetParent(), reader->GetValue());
-				auto page = RefPtr<Page>::MakeRef(ownerToc->m_manager, ownerToc->m_ownerCategoryItem, path);
+				PathName path(ownerToc->m_srcPageFullPath.GetParent(), reader->GetValue());
+				auto page = RefPtr<Page>::MakeRef(ownerToc->m_manager, ownerToc->m_ownerCategoryItem, PathName(), path);
 				ownerToc->m_manager->m_allPageList.Add(page);
 				item->m_page = page;
 			}
@@ -175,13 +178,29 @@ String TocTreeItem::GetCaption() const
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-RefPtr<CategoryToc> CategoryToc::Deserialize(XmlFileReader* reader, CategoryItem* owner)
+RefPtr<CategoryToc> CategoryToc::Deserialize(XmlFileReader* reader, PathName xmlFileParentFullPath, CategoryItem* owner)
 {
 	auto item = RefPtr<CategoryToc>::MakeRef();
 	item->m_manager = owner->m_manager;
 	item->m_ownerCategoryItem = owner;
 
-	// attr は今のところ無い
+	if (reader->MoveToFirstAttribute())
+	{
+		do
+		{
+			if (reader->GetName() == _T("page"))
+			{
+				item->m_srcPageFullPath = PathName(xmlFileParentFullPath, reader->GetValue());
+
+				auto page = RefPtr<Page>::MakeRef(item->m_manager, owner, PathName(), item->m_srcPageFullPath);
+				item->m_manager->m_allPageList.Add(page);
+				item->m_rootPage = page;
+			}
+
+		} while (reader->MoveToNextAttribute());
+
+		reader->MoveToElement();
+	}
 
 	if (reader->IsEmptyElement()) return item;
 
@@ -205,6 +224,7 @@ RefPtr<CategoryToc> CategoryToc::Deserialize(XmlFileReader* reader, CategoryItem
 String CategoryToc::MakeTocTree(Page* page)
 {
 	StringWriter writer;
+	writer.WriteLine(_T("<div class=\"col-md-2\">"));
 	writer.WriteLine(_T("<ul class=\"list-group\">"));
 
 	for (auto& item : m_rootTreeItemList)
@@ -224,6 +244,7 @@ String CategoryToc::MakeTocTree(Page* page)
 	}
 
 	writer.WriteLine(_T("</ul>"));
+	writer.WriteLine(_T("</div>"));
 	return writer.ToString();
 }
 
@@ -246,19 +267,20 @@ RefPtr<CategoryItem> CategoryItem::Deserialize(XmlFileReader* reader, Manager* m
 		{
 			if (reader->GetName() == _T("page"))
 			{
-				auto page = RefPtr<Page>::MakeRef(manager, item, reader->GetValue());
-				manager->m_allPageList.Add(page);
-				item->m_page = page;
+				item->m_srcPagePath = reader->GetValue();
+				//auto page = RefPtr<Page>::MakeRef(manager, item, reader->GetValue());
+				//manager->m_allPageList.Add(page);
+				//item->m_page = page;
 			}
 			else if (reader->GetName() == _T("caption"))
 			{
 				item->m_caption = reader->GetValue();
 			}
-			else if (reader->GetName() == _T("tok"))
-			{
-				item->m_srcTokRelPath = PathName(reader->GetValue());
-				item->m_srcTokFullPath = PathName(manager->m_srcRootDir, reader->GetValue());
-			}
+			//else if (reader->GetName() == _T("tok"))
+			//{
+			//	item->m_srcTokRelPath = PathName(reader->GetValue());
+			//	item->m_srcTokFullPath = PathName(manager->m_srcRootDir, reader->GetValue());
+			//}
 
 		} while (reader->MoveToNextAttribute());
 
@@ -284,19 +306,48 @@ RefPtr<CategoryItem> CategoryItem::Deserialize(XmlFileReader* reader, Manager* m
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
+Page* CategoryItem::GetCategoryRootPage()
+{
+	if (m_toc != nullptr) {
+		return m_toc->GetRootPage();
+	}
+	if (m_page != nullptr) {
+		return m_page;
+	}
+	return nullptr;
+}
+
+//-----------------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 void CategoryItem::MakeToc()
 {
-	if (!m_srcTokFullPath.IsEmpty())
+	// Toc 指定
+	if (m_srcPagePath.EqualExtension(_T(".xml")))
 	{
-		XmlFileReader reader(PathName(m_manager->m_srcRootDir, m_srcTokFullPath));
+		m_srcTokRelPath = PathName(m_srcPagePath);
+		m_srcTokFullPath = PathName(m_manager->m_srcRootDir, m_srcPagePath);
+		PathName xmlPath(m_manager->m_srcRootDir, m_srcTokFullPath);
+		XmlFileReader reader(xmlPath);
 		while (reader.Read())
 		{
 			if (reader.GetNodeType() == XmlNodeType::Element &&
 				reader.GetName() == _T("Toc"))
 			{
-				m_toc = CategoryToc::Deserialize(&reader, this);
+				m_toc = CategoryToc::Deserialize(&reader, xmlPath.GetParent(), this);
 			}
 		}
+	}
+	// 普通のページ
+	else if (m_srcPagePath.EqualExtension(_T(".md")))
+	{
+		auto page = RefPtr<Page>::MakeRef(m_manager, this, PathName(), PathName(m_manager->m_srcRootDir, m_srcPagePath));
+		m_manager->m_allPageList.Add(page);
+		m_page = page;
+	}
+	else
+	{
+		// キャプションだけ持つカテゴリアイテム
 	}
 }
 
@@ -336,8 +387,8 @@ String CategoryItem::MakeNavbarTextInActive(Page* page)
 
 			for (auto& child : item->m_children)
 			{
-				String relPath = String::Format(_T("{0}/{1}"), page->GetRelPathToRoot(), child->m_page->GetOutputRelPath());	// root に戻って、指定のページに移動するようなパス
-				linkSpan = String::Format(_T("<a href=\"{0}\">{1}</a>"), relPath.Replace(_T("\\"), _T("/")), child->m_page->GetCaption());
+				String relPath = String::Format(_T("{0}/{1}"), page->GetRelPathToRoot(), child->GetCategoryRootPage()->GetOutputRelPath());	// root に戻って、指定のページに移動するようなパス
+				linkSpan = String::Format(_T("<a href=\"{0}\">{1}</a>"), relPath.Replace(_T("\\"), _T("/")), child->GetCategoryRootPage()->GetCaption());
 
 				writer.WriteLine(String::Format(_T("<li>{0}</li>"), linkSpan));
 			}
@@ -390,7 +441,5 @@ void Manager::Execute(const PathName& srcDir, const PathName& templateDir, const
 	{
 		page->ExportPageFile();
 	}
-
-	printf("");
 }
 

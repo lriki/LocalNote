@@ -9,6 +9,7 @@
 
 	<!-- Bootstrap -->
 	<link href="$(LN_TO_ROOT_PATH)/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="$(LN_TO_ROOT_PATH)/page_contents.css" rel="stylesheet">
 	
 	<!-- affix-nav style -->
 	<style>
@@ -58,15 +59,23 @@ NAVBAR_ITEMS
 
 		<div class="container">
 			<div class="row">
-				<div class="col-md-2">
+				<!--======== index ========-->
 TOC_TREE
-				</div>
-				<div class="col-md-8">
+				<!--======== index ========-->
+				
+				
+				<div class="col-md-8">	<!--======== contents ========-->
+					<div class="lnpc">
 PAGE_CONTENTS
-				</div>
-				<div class="col-md-2">
+					</div>
+				</div>	<!--======== contents ========-->
+				
+				
+				
+				<div class="col-xs-2">	<!--======== anchors ========-->
 PAGE_INDEX_LIST
-				</div>
+				</div>	<!--======== anchors ========-->
+				
 			</div>
 		</div>
 		

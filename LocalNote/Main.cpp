@@ -10,6 +10,7 @@ pandoc -f markdown -t html5 -o index.html index.md
 int main(int argc, char **argv)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	setlocale(LC_ALL, "");
 
 	try
 	{

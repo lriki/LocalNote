@@ -1,4 +1,4 @@
-<Toc>
+<Toc page="index.md">
 	<TreeItem caption="基本機能">
 		<TreeItem page="Base/String.md" />
 		<TreeItem page="Base/PathName.md" />
